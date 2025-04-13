@@ -1,0 +1,49 @@
+@font-face {
+  font-family: AzeretMono;
+  src: url("/public/fonts/AzeretMono.otf");
+  font-style: normal;
+}
+
+@font-face {
+  font-family: SourceSans;
+  src: url("/public/fonts/Lato-Regular.ttf");
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Excon;
+  src: url("/public/fonts/Excon-Regular.otf");
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Satoshi;
+  src: url("/public/fonts/Satoshi-Regular.otf");
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Ahganirya;
+  src: url("/public/fonts/Ahganirya.otf");
+  font-style: normal;
+}
+
+.title-font {
+  font-family: AzeretMono !important;
+}
+
+.sub-font {
+  font-family: Excon !important;
+}
+
+.normal-font {
+  font-family: Satoshi !important;
+}
+
+.rich-font {
+  font-family: Ahganirya !important;
+}
+
+body {
+  font-family: SourceSans !important;
+}
