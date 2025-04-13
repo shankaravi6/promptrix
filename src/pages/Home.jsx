@@ -86,7 +86,7 @@ const Home = () => {
       {/* Main Content */}
       <div className="relative z-10 min-h-screen pt-24">
         {/* Header */}
-        <div className="fixed top-0 left-0 w-full z-20 bg-black/50 backdrop-blur-md px-4 py-3 flex flex-wrap justify-between items-center gap-y-3 sm:px-6 sm:py-6">
+        <div className="fixed top-0 left-0 w-full z-20 bg-black/30 backdrop-blur-md px-4 py-3 flex flex-wrap justify-between items-center gap-y-3 sm:px-6 sm:py-6">
           <div className="w-full sm:w-auto flex items-center gap-2.5 justify-center sm:justify-start">
             <img src="/favicon.png" className="w-8 h-8" />
             <span className="text-neutral-300 text-lg sm:text-xl font-semibold">
