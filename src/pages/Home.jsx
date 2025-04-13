@@ -74,7 +74,7 @@ const Home = () => {
     <div
       className="relative min-h-screen p-4 sm:p-6 text-white font-display"
       style={{
-        backgroundImage: "url('/images/background2.jpg')",
+        backgroundImage: "url('/images/background.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundAttachment: "fixed",
