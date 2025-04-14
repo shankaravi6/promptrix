@@ -6,8 +6,24 @@ import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import TypingText from "../components/TypingText ";
 import ContentPasteGoIcon from "@mui/icons-material/ContentPasteGo";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+  useUser,
+  useClerk,
+} from "@clerk/clerk-react";
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe(
+  "pk_test_51OPpYOSF01MmEgFzwKtafOb8ZvgNl19ifexLmQaU1XUFdXsEwwN6dkIJMLOZxzeIgRrEZ3x3DWiCQ8qsI10UFlZc00kpOSSo6J"
+);
 
 const Home = () => {
+  const { user } = useUser();
+  const { openSignIn } = useClerk();
+
   const [categories, setCategories] = useState([]);
   const [selected, setSelected] = useState("");
   const [allPrompts, setAllPrompts] = useState([]);
@@ -20,6 +36,70 @@ const Home = () => {
   const [loadingPrompts, setLoadingPrompts] = useState(true);
   const [premiumPrompts, setPremiumPrompts] = useState([]);
   const [loadingPremium, setLoadingPremium] = useState(true);
+
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  const [paidPrompts, setPaidPrompts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user && user.emailAddresses?.[0]?.emailAddress) {
+      const fetchPaidPrompts = async () => {
+        try {
+          const email = user.emailAddresses[0].emailAddress;
+          const response = await fetch(
+            `https://blackcms.onrender.com/api/data/promptrix/paidpromts/${email}`
+          );
+          const data = await response.json();
+
+          if (data.status === "success") {
+            console.log("after paid", data.data);
+            setPaidPrompts(data.data); // You can map or flatten this if needed
+          } else {
+            console.warn("No paid prompts found.");
+          }
+        } catch (err) {
+          console.error("Error fetching paid prompts:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchPaidPrompts();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const sessionId = queryParams.get("session_id");
+
+    if (sessionId) {
+      fetch("https://blackcms.onrender.com/api/data/promptrix/verify-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ session_id: sessionId }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.status === "success") {
+            setSnackbarMessage("🎉 Payment Successful! Prompt Unlocked.");
+            setSnackbarOpen(true);
+
+            // Remove session_id from URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete("session_id");
+            window.history.replaceState({}, document.title, url.toString());
+          } else {
+            console.warn("Payment not successful");
+          }
+        })
+        .catch((err) => {
+          console.error("Verification error:", err);
+        });
+    }
+  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -76,6 +156,7 @@ const Home = () => {
         const res = await axios.get(
           `https://blackcms.onrender.com/api/data/premdata/cate/${selected}`
         );
+        console.log("before paid", res.data.data);
         setPremiumPrompts(res.data.data || []);
       } catch (err) {
         console.error("Error fetching premium prompts", err);
@@ -91,6 +172,52 @@ const Home = () => {
     navigator.clipboard.writeText(text);
     setSnackbarMessage("Copied to Clipboard!");
     setSnackbarOpen(true);
+  };
+
+  const handleBuyClick = (e, item) => {
+    if (!user) {
+      openSignIn();
+      return;
+    }
+    handleBuyPrompt(e, item);
+  };
+
+  const handleBuyPrompt = async (e, item) => {
+    console.log(item);
+    console.log(user);
+    try {
+      const res = await fetch(
+        "https://blackcms.onrender.com/api/data/promptrix/stripe-payment/promptrix_payments_test",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            products: [
+              {
+                name: item.title,
+                price: item.price,
+                id: item._id,
+                count: 1,
+              },
+            ],
+            userName: user.fullName,
+            email: user.emailAddresses[0].emailAddress,
+          }),
+        }
+      );
+
+      const result = await res.json();
+
+      if (result.status) {
+        const stripe = await stripePromise;
+        stripe.redirectToCheckout({ sessionId: result.data.sessionId });
+      } else {
+        alert("Something went wrong: " + result.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Payment failed");
+    }
   };
 
   return (
@@ -113,10 +240,23 @@ const Home = () => {
               PROMPTRIX
             </span>
           </div>
-          <div className="w-full sm:w-auto flex justify-center sm:justify-end">
-            <button className="title-font px-5 py-1.5 rounded-md tracking-wider text-sm sm:text-base text-orange-100 bg-gradient-to-r from-[#0e0000] via-[#4a1703] to-[#a43806ca] cursor-pointer">
-              BETA
-            </button>
+          <div className="w-full sm:w-auto flex justify-center sm:justify-end items-center gap-3">
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="px-4 py-1.5 cursor-pointer rounded-md text-sm sm:text-base text-orange-100 bg-gradient-to-r from-[#00000099] via-[#4a1703] to-[#a43806ca] hover:from-[#a43806ca] hover:via-[#4a1703] hover:to-[#00000099] transition-all duration-1000 ease-in-out">
+                  Login / Signup
+                </button>
+              </SignInButton>
+            </SignedOut>
+
+            <SignedIn>
+              <div className="flex items-center gap-2">
+                <span className="text-orange-100 text-sm sm:text-base">
+                  Hi, {user?.firstName || user?.username}
+                </span>
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            </SignedIn>
           </div>
         </div>
 
@@ -202,55 +342,85 @@ const Home = () => {
         </div>
 
         {/* Premium Prompts */}
-        {!loadingPremium &&
-          premiumPrompts.filter((item) => item.category === selected).length >
-            0 && (
-            <div className="px-4 pb-20">
-              <h2 className="text-xl sm:text-2xl text-center text-orange-200 main-font mb-6 tracking-wide">
-                Premium &nbsp; Prompts
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {premiumPrompts
-                  .filter((item) => item.category === selected)
-                  .map((item, i) => (
-                    <div
-                      key={`premium-${i}`}
-                      className="p-4 pb-6 rounded-xl flex flex-col justify-between gap-4 bg-orange-200/10 backdrop-blur-md border border-orange-300/20"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex flex-col">
-                          <div className="flex items-start gap-2">
-                            <h2 className="text-lg sm:text-xl text-orange-100 sub-font">
-                              {item.title}
-                            </h2>
-                            <FormatQuoteIcon
-                              style={{
-                                fontSize: "28px",
-                                color: "rgb(228 175 140 / 76%)",
-                              }}
-                            />
-                          </div>
-                          <div className="text-left pt-1">
-                            <button
-                              disabled
-                              className="text-xs text-orange-300 bg-orange-800/20 px-3 py-1.5 rounded-sm"
-                            >
-                              Premium Prompt
-                            </button>
-                          </div>
+        {!loadingPremium && (
+          <div className="px-4 pb-20">
+            <h2 className="text-xl sm:text-2xl text-center text-orange-200 main-font mb-6 tracking-wide">
+              Premium &nbsp; Prompts
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {premiumPrompts.map((item, i) => {
+                // Check if the item is in paidPrompts by matching the id with the _id
+                const matchingPaidPrompt = paidPrompts.find(
+                  (paidItem) => paidItem.id === item._id
+                );
+
+                return (
+                  <div
+                    key={`premium-${i}`}
+                    className="p-4 pb-6 rounded-xl flex flex-col justify-between gap-4 bg-orange-200/10 backdrop-blur-md border border-orange-300/20"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex flex-col">
+                        <div className="flex items-start gap-2">
+                          <h2 className="text-lg sm:text-xl text-orange-100 sub-font">
+                            {item.title}
+                          </h2>
+                          <FormatQuoteIcon
+                            style={{
+                              fontSize: "28px",
+                              color: "rgb(228 175 140 / 76%)",
+                            }}
+                          />
                         </div>
-                        <span className="bg-orange-300/10 text-orange-200 text-sm px-2 py-1 rounded-md border border-orange-400/20">
-                          ₹{item.price}
-                        </span>
+                        <div className="text-left pt-1">
+                          <button
+                            disabled
+                            className="text-xs text-orange-300 bg-orange-800/20 px-3 py-1.5 rounded-sm"
+                          >
+                            Premium Prompt
+                          </button>
+                        </div>
                       </div>
+                      {matchingPaidPrompt ? (
+                        <span className="bg-orange-300/10 text-orange-200 text-sm px-2 py-1 rounded-md border border-orange-400/20">
+                          Paid
+                        </span>
+                      ) : (
+                        <span className="bg-orange-300/10 text-orange-200 text-sm px-2 py-1 rounded-md border border-orange-400/20">
+                          ${item.price}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Show the prompt text if purchased, or show placeholder */}
+                    {matchingPaidPrompt ? (
+                      <p className="text-neutral-400 text-sm text-justify">
+                        {matchingPaidPrompt.prompt.slice(0, 200)}
+                        {matchingPaidPrompt.prompt.length > 150 ? "..." : ""}
+                      </p>
+                    ) : (
                       <p className="text-neutral-500 italic blur-sm select-none text-justify">
                         Lorem ipsum dolor sit amet consectetur adipiscing elit.
                         Quisque faucibus ex sapien vitae pellentesque sem
                         placerat...
                       </p>
+                    )}
+
+                    {matchingPaidPrompt ? (
+                      <div className="flex items-start">
+                        <button
+                          onClick={() => handleCopy(matchingPaidPrompt.prompt)}
+                          className="text-xs cursor-pointer text-stone-400 tracking-wide px-3 py-1.5 rounded-sm bg-orange-600/15 hover:bg-orange-500/20 transition"
+                        >
+                          Click to copy the prompt&nbsp;&nbsp;
+                          <ContentCopyIcon style={{ fontSize: "15px" }} />
+                        </button>
+                      </div>
+                    ) : (
                       <div className="text-right pt-1">
                         <button
-                          disabled
+                          onClick={(e) => handleBuyClick(e, item)}
+                          type="button"
                           className="text-xs text-orange-200 bg-orange-100/20 px-3 py-1.5 rounded-sm cursor-pointer"
                         >
                           <div className="flex flex-row gap-2 items-center">
@@ -261,11 +431,13 @@ const Home = () => {
                           </div>
                         </button>
                       </div>
-                    </div>
-                  ))}
-              </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
+        )}
       </div>
 
       <Snackbar
@@ -286,6 +458,16 @@ const Home = () => {
           }}
         >
           {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={paymentSuccess}
+        autoHideDuration={5000}
+        onClose={() => setPaymentSuccess(false)}
+      >
+        <Alert severity="success" sx={{ width: "100%" }}>
+          Payment successful! Prompt unlocked.
         </Alert>
       </Snackbar>
     </div>
