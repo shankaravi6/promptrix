@@ -4,6 +4,7 @@ import { Snackbar, Alert, CircularProgress } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import TypingText from "../components/TypingText ";
+import ContentPasteGoIcon from "@mui/icons-material/ContentPasteGo";
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
@@ -196,8 +197,15 @@ const Home = () => {
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity="success"
-          sx={{ width: "100%" }}
+          icon={<ContentPasteGoIcon sx={{ color: "#fcc49c" }} />}
+          severity="warning"
+          sx={{
+            width: "100%",
+            backgroundColor: "#333",
+            color: "#fff",
+            boxShadow: 3,
+            color: "#a1a1aa",
+          }}
         >
           {snackbarMessage}
         </Alert>
