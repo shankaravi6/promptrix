@@ -24,7 +24,7 @@ const TypingText = ({ text, speed = 100, pause = 3000 }) => {
   }, [index, text, speed, pause]);
 
   return (
-    <h1 className="text-md sm:text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-neutral-400 to-neutral-300 main-font max-w-full sm:max-w-xl truncate sm:line-clamp-1 text-center p-5 pb-5 lg:pb-7 sm:pb-6 md:pb-6">
+    <h1 className="text-md sm:text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-orange-100 to-orange-300 main-font max-w-full sm:max-w-xl truncate sm:line-clamp-1 text-center p-5 pb-5 lg:pb-7 sm:pb-6 md:pb-6">
       {statText}
       <span className="animate-pulse">|</span>
     </h1>

@@ -5,6 +5,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
 import TypingText from "../components/TypingText ";
 import ContentPasteGoIcon from "@mui/icons-material/ContentPasteGo";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 
 const Home = () => {
   const [categories, setCategories] = useState([]);
@@ -17,8 +18,9 @@ const Home = () => {
 
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [loadingPrompts, setLoadingPrompts] = useState(true);
+  const [premiumPrompts, setPremiumPrompts] = useState([]);
+  const [loadingPremium, setLoadingPremium] = useState(true);
 
-  // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -27,7 +29,7 @@ const Home = () => {
         );
         const fetched = res.data.data.map((c) => c.title);
         setCategories(fetched);
-        setSelected(fetched[0]); // Set the first category as default
+        setSelected(fetched[0]);
       } catch (err) {
         console.error("Error fetching categories", err);
       } finally {
@@ -37,11 +39,9 @@ const Home = () => {
     fetchCategories();
   }, []);
 
-  // Fetch prompts based on selected category
   useEffect(() => {
     const fetchPrompts = async () => {
-      if (!selected) return; // If no category is selected, don't fetch
-
+      if (!selected) return;
       try {
         setLoadingPrompts(true);
         const res = await axios.get(
@@ -55,9 +55,8 @@ const Home = () => {
       }
     };
     fetchPrompts();
-  }, [selected]); // Trigger this when the category is changed
+  }, [selected]);
 
-  // Filter prompts based on search query
   useEffect(() => {
     const filtered = allPrompts.filter(
       (p) =>
@@ -65,9 +64,29 @@ const Home = () => {
         p.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredPrompts(filtered);
-  }, [selected, allPrompts, searchQuery]); // Trigger when selected category or search query changes
+  }, [selected, allPrompts, searchQuery]);
 
-  // Copy handler
+  // Fetch premium prompts
+  useEffect(() => {
+    if (!selected) return;
+
+    const fetchPremiumPrompts = async () => {
+      try {
+        setLoadingPremium(true);
+        const res = await axios.get(
+          `https://blackcms.onrender.com/api/data/premdata/cate/${selected}`
+        );
+        setPremiumPrompts(res.data.data || []);
+      } catch (err) {
+        console.error("Error fetching premium prompts", err);
+      } finally {
+        setLoadingPremium(false);
+      }
+    };
+
+    fetchPremiumPrompts();
+  }, [selected]);
+
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
     setSnackbarMessage("Copied to Clipboard!");
@@ -84,21 +103,18 @@ const Home = () => {
         backgroundAttachment: "fixed",
       }}
     >
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-0" />
 
-      {/* Main Content */}
       <div className="relative z-10 min-h-screen pt-24">
-        {/* Header */}
         <div className="fixed top-0 left-0 w-full z-20 bg-black/30 backdrop-blur-md px-4 py-3 flex flex-wrap justify-between items-center gap-y-3 sm:px-6 sm:py-6">
           <div className="w-full sm:w-auto flex items-center gap-2.5 justify-center sm:justify-start">
             <img src="/favicon.png" className="w-8 h-8" />
-            <span className="text-neutral-400 text-xl sm:text-2xl tracking-wider title-font">
+            <span className="text-orange-100 text-xl sm:text-2xl tracking-wider title-font">
               PROMPTRIX
             </span>
           </div>
           <div className="w-full sm:w-auto flex justify-center sm:justify-end">
-            <button className="title-font px-5 py-1.5 rounded-md tracking-wider text-sm sm:text-base text-neutral-400 bg-gradient-to-r from-[#0e0000] via-[#4a1703] to-[#a43806ca] cursor-pointer">
+            <button className="title-font px-5 py-1.5 rounded-md tracking-wider text-sm sm:text-base text-orange-100 bg-gradient-to-r from-[#0e0000] via-[#4a1703] to-[#a43806ca] cursor-pointer">
               BETA
             </button>
           </div>
@@ -108,8 +124,7 @@ const Home = () => {
           <TypingText text="Prompt Everything!" />
         </div>
 
-        {/* Categories */}
-        <div className="flex flex-wrap gap-3 pt-12 justify-center mb-5 px-4 mt-0 lg:mt-0 md:mt-0 sm:mt-5">
+        <div className="flex flex-wrap gap-3 pt-12 justify-center mb-5 px-4 mt-0">
           {loadingCategories ? (
             <CircularProgress size={28} style={{ color: "#aaa" }} />
           ) : (
@@ -129,7 +144,6 @@ const Home = () => {
           )}
         </div>
 
-        {/* Search Input */}
         {!loadingCategories && categories.length > 0 && (
           <div className="flex justify-center mb-8 px-4 pt-3">
             <input
@@ -186,9 +200,74 @@ const Home = () => {
             ))
           )}
         </div>
+
+        {/* Premium Prompts */}
+        {!loadingPremium &&
+          premiumPrompts.filter((item) => item.category === selected).length >
+            0 && (
+            <div className="px-4 pb-20">
+              <h2 className="text-xl sm:text-2xl text-center text-orange-200 main-font mb-6 tracking-wide">
+                Premium &nbsp; Prompts
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {premiumPrompts
+                  .filter((item) => item.category === selected)
+                  .map((item, i) => (
+                    <div
+                      key={`premium-${i}`}
+                      className="p-4 pb-6 rounded-xl flex flex-col justify-between gap-4 bg-orange-200/10 backdrop-blur-md border border-orange-300/20"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex flex-col">
+                          <div className="flex items-start gap-2">
+                            <h2 className="text-lg sm:text-xl text-orange-100 sub-font">
+                              {item.title}
+                            </h2>
+                            <FormatQuoteIcon
+                              style={{
+                                fontSize: "28px",
+                                color: "rgb(228 175 140 / 76%)",
+                              }}
+                            />
+                          </div>
+                          <div className="text-left pt-1">
+                            <button
+                              disabled
+                              className="text-xs text-orange-300 bg-orange-800/20 px-3 py-1.5 rounded-sm"
+                            >
+                              Premium Prompt
+                            </button>
+                          </div>
+                        </div>
+                        <span className="bg-orange-300/10 text-orange-200 text-sm px-2 py-1 rounded-md border border-orange-400/20">
+                          ₹{item.price}
+                        </span>
+                      </div>
+                      <p className="text-neutral-500 italic blur-sm select-none text-justify">
+                        Lorem ipsum dolor sit amet consectetur adipiscing elit.
+                        Quisque faucibus ex sapien vitae pellentesque sem
+                        placerat...
+                      </p>
+                      <div className="text-right pt-1">
+                        <button
+                          disabled
+                          className="text-xs text-orange-200 bg-orange-100/20 px-3 py-1.5 rounded-sm cursor-pointer"
+                        >
+                          <div className="flex flex-row gap-2 items-center">
+                            <ShoppingCartIcon
+                              sx={{ color: "#fcc49c", fontSize: "20px" }}
+                            />
+                            <p>Buy Now</p>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
       </div>
 
-      {/* Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -202,9 +281,8 @@ const Home = () => {
           sx={{
             width: "100%",
             backgroundColor: "#333",
-            color: "#fff",
+            color: "#fcc49c",
             boxShadow: 3,
-            color: "#a1a1aa",
           }}
         >
           {snackbarMessage}
