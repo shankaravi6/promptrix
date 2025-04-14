@@ -187,7 +187,7 @@ const Home = () => {
     console.log(user);
     try {
       const res = await fetch(
-        "https://blackcms.onrender.com/api/data/promptrix/stripe-payment/promptrix_payments_test",
+        "https://blackcms.onrender.com/api/data/promptrix/stripe-payment/promptrix_payments_data",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
