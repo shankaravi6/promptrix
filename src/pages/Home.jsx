@@ -459,7 +459,7 @@ const Home = () => {
                         </span>
                       ) : (
                         <span className="bg-orange-300/10 text-orange-200 text-sm px-2 py-1 rounded-md border border-orange-400/20">
-                          ${item.price}
+                          ₹{item.price}
                         </span>
                       )}
                     </div>
