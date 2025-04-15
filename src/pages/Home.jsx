@@ -230,7 +230,7 @@ const Home = () => {
         const { orderId, amount } = result.data;
 
         const options = {
-          key: process.env.RAZORPAY_KEY_ID, // Use test key in dev if needed
+          key: "rzp_live_uQXr5ROy3VcTsl", // Use test key in dev if needed
           amount: amount,
           currency: "INR",
           name: "Promptrix",
