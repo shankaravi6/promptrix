@@ -15,6 +15,8 @@ import {
   useClerk,
 } from "@clerk/clerk-react";
 import { loadStripe } from "@stripe/stripe-js";
+import Razorpay from "razorpay";
+import dotenv from "dotenv";
 
 const stripePromise = loadStripe(
   "pk_test_51OPpYOSF01MmEgFzwKtafOb8ZvgNl19ifexLmQaU1XUFdXsEwwN6dkIJMLOZxzeIgRrEZ3x3DWiCQ8qsI10UFlZc00kpOSSo6J"
@@ -41,6 +43,7 @@ const Home = () => {
 
   const [paidPrompts, setPaidPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isPaid, setIsPaid] = useState(false);
 
   useEffect(() => {
     if (user && user.emailAddresses?.[0]?.emailAddress) {
@@ -166,7 +169,7 @@ const Home = () => {
     };
 
     fetchPremiumPrompts();
-  }, [selected]);
+  }, [selected, isPaid]);
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text);
@@ -182,12 +185,27 @@ const Home = () => {
     handleBuyPrompt(e, item);
   };
 
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleBuyPrompt = async (e, item) => {
-    console.log(item);
-    console.log(user);
+    const scriptLoaded = await loadRazorpayScript();
+
+    if (!scriptLoaded) {
+      alert("Failed to load Razorpay SDK. Are you online?");
+      return;
+    }
+
     try {
       const res = await fetch(
-        "https://blackcms.onrender.com/api/data/promptrix/stripe-payment/promptrix_payments_data",
+        "https://blackcms.onrender.com/api/data/promptrix/razorpay-payment/promptrix_payments_data",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -209,8 +227,62 @@ const Home = () => {
       const result = await res.json();
 
       if (result.status) {
-        const stripe = await stripePromise;
-        stripe.redirectToCheckout({ sessionId: result.data.sessionId });
+        const { orderId, amount } = result.data;
+
+        const options = {
+          key: process.env.RAZORPAY_KEY_ID, // Use test key in dev if needed
+          amount: amount,
+          currency: "INR",
+          name: "Promptrix",
+          description: "Prompt Purchase",
+          order_id: orderId,
+          handler: async function (response) {
+            const verifyRes = await fetch(
+              "https://blackcms.onrender.com/api/data/promptrix/razor-verify-payment/promptrix_payments_data",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  products: [
+                    {
+                      name: item.title,
+                      price: item.price,
+                      id: item._id,
+                      count: 1,
+                    },
+                  ],
+                  userName: user.fullName,
+                  email: user.emailAddresses[0].emailAddress,
+                }),
+              }
+            );
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.status === "success") {
+              setSnackbarMessage("🎉 Payment Successful! Prompt Unlocked.");
+              setSnackbarOpen(true);
+              setIsPaid(true);
+            } else {
+              alert("Payment verification failed.");
+            }
+          },
+          prefill: {
+            name: user.fullName,
+            email: user.emailAddresses[0].emailAddress,
+          },
+          theme: {
+            color: "#000000",
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
       } else {
         alert("Something went wrong: " + result.error);
       }
