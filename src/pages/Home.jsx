@@ -70,7 +70,7 @@ const Home = () => {
 
       fetchPaidPrompts();
     }
-  }, [user]);
+  }, [user, isPaid]);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -268,6 +268,7 @@ const Home = () => {
               setSnackbarMessage("🎉 Payment Successful! Prompt Unlocked.");
               setSnackbarOpen(true);
               setIsPaid(true);
+              fetchPaidPrompts();
             } else {
               alert("Payment verification failed.");
             }
