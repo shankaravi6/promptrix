@@ -17,6 +17,7 @@ import {
 import { loadStripe } from "@stripe/stripe-js";
 import Razorpay from "razorpay";
 import dotenv from "dotenv";
+import { BASE_URL } from "../hooks/baseURL";
 
 const stripePromise = loadStripe(
   "pk_test_51OPpYOSF01MmEgFzwKtafOb8ZvgNl19ifexLmQaU1XUFdXsEwwN6dkIJMLOZxzeIgRrEZ3x3DWiCQ8qsI10UFlZc00kpOSSo6J"
@@ -51,7 +52,7 @@ const Home = () => {
         try {
           const email = user.emailAddresses[0].emailAddress;
           const response = await fetch(
-            `https://blackcms.onrender.com/api/data/promptrix/paidpromts/${email}`
+            `${BASE_URL}/api/data/promptrix/paidpromts/${email}`
           );
           const data = await response.json();
 
@@ -77,7 +78,7 @@ const Home = () => {
     const sessionId = queryParams.get("session_id");
 
     if (sessionId) {
-      fetch("https://blackcms.onrender.com/api/data/promptrix/verify-payment", {
+      fetch(`${BASE_URL}/api/data/promptrix/verify-payment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,9 +108,7 @@ const Home = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await axios.get(
-          "https://blackcms.onrender.com/api/data/promptrix_category"
-        );
+        const res = await axios.get(`${BASE_URL}/api/data/promptrix_category`);
         const fetched = res.data.data.map((c) => c.title);
         setCategories(fetched);
         setSelected(fetched[0]);
@@ -128,7 +127,7 @@ const Home = () => {
       try {
         setLoadingPrompts(true);
         const res = await axios.get(
-          `https://blackcms.onrender.com/api/data/promptrix_data/category/${selected}`
+          `${BASE_URL}/api/data/promptrix_data/category/${selected}`
         );
         setAllPrompts(res.data.data || []);
       } catch (err) {
@@ -157,7 +156,7 @@ const Home = () => {
       try {
         setLoadingPremium(true);
         const res = await axios.get(
-          `https://blackcms.onrender.com/api/data/premdata/cate/${selected}`
+          `${BASE_URL}/api/data/premdata/cate/${selected}`
         );
         console.log("before paid", res.data.data);
         setPremiumPrompts(res.data.data || []);
@@ -205,7 +204,7 @@ const Home = () => {
 
     try {
       const res = await fetch(
-        "https://blackcms.onrender.com/api/data/promptrix/razorpay-payment/promptrix_payments_data",
+        `${BASE_URL}/api/data/promptrix/razorpay-payment/promptrix_payments_data`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -238,7 +237,7 @@ const Home = () => {
           order_id: orderId,
           handler: async function (response) {
             const verifyRes = await fetch(
-              "https://blackcms.onrender.com/api/data/promptrix/razor-verify-payment/promptrix_payments_data",
+              `${BASE_URL}/api/data/promptrix/razor-verify-payment/promptrix_payments_data`,
               {
                 method: "POST",
                 headers: {
@@ -396,14 +395,21 @@ const Home = () => {
                     }}
                   />
                 </div>
-                <p className="text-neutral-400 text-sm">
-                  {prompt.prompt.slice(0, 200)}
+                <div className="flex justify-center items-center">
+                  <img
+                    width={"400px"}
+                    className="rounded-lg"
+                    src={`${BASE_URL}/uploads/${prompt.imageName}`}
+                  />
+                </div>
+                <p className="text-neutral-400 text-sm text-justify">
+                  {prompt.prompt.slice(0, 150)}
                   {prompt.prompt.length > 150 ? "..." : ""}
                 </p>
                 <div className="flex items-start">
                   <button
                     onClick={() => handleCopy(prompt.prompt)}
-                    className="text-xs cursor-pointer text-stone-400 tracking-wide px-3 py-1.5 rounded-sm bg-orange-600/15 hover:bg-orange-500/20 transition"
+                    className="text-xs cursor-pointer text-orange-200 tracking-wide px-3 py-1.5 rounded-sm bg-orange-600/15 hover:bg-orange-500/20 transition"
                   >
                     Click to copy the prompt&nbsp;&nbsp;
                     <ContentCopyIcon style={{ fontSize: "15px" }} />
@@ -465,10 +471,18 @@ const Home = () => {
                       )}
                     </div>
 
+                    <div className="flex justify-center items-center">
+                      <img
+                        width={"400px"}
+                        className="rounded-lg"
+                        src={`${BASE_URL}/uploads/${item.imageName}`}
+                      />
+                    </div>
+
                     {/* Show the prompt text if purchased, or show placeholder */}
                     {matchingPaidPrompt ? (
                       <p className="text-neutral-400 text-sm text-justify">
-                        {matchingPaidPrompt.prompt.slice(0, 200)}
+                        {matchingPaidPrompt.prompt.slice(0, 150)}
                         {matchingPaidPrompt.prompt.length > 150 ? "..." : ""}
                       </p>
                     ) : (
@@ -483,7 +497,7 @@ const Home = () => {
                       <div className="flex items-start">
                         <button
                           onClick={() => handleCopy(matchingPaidPrompt.prompt)}
-                          className="text-xs cursor-pointer text-stone-400 tracking-wide px-3 py-1.5 rounded-sm bg-orange-600/15 hover:bg-orange-500/20 transition"
+                          className="text-xs cursor-pointer text-orange-200 tracking-wide px-3 py-1.5 rounded-sm bg-orange-600/15 hover:bg-orange-500/20 transition"
                         >
                           Click to copy the prompt&nbsp;&nbsp;
                           <ContentCopyIcon style={{ fontSize: "15px" }} />
