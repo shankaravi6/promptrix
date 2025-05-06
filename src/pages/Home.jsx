@@ -315,7 +315,7 @@ const Home = () => {
           <div className="w-full sm:w-auto flex justify-center sm:justify-end items-center gap-3">
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="px-4 py-1.5 cursor-pointer rounded-md text-sm sm:text-base text-orange-100 bg-gradient-to-r from-[#00000099] via-[#4a1703] to-[#a43806ca] hover:from-[#a43806ca] hover:via-[#4a1703] hover:to-[#00000099] transition-all duration-1000 ease-in-out">
+                <button className="px-4 py-1.5 cursor-pointer rounded-md text-sm sm:text-base text-orange-100 bg-gradient-to-r from-[#00000099] via-[#4a1703] to-[#a43806ca]">
                   Login / Signup
                 </button>
               </SignInButton>
@@ -356,7 +356,7 @@ const Home = () => {
           )}
         </div>
 
-        {!loadingCategories && categories.length > 0 && (
+        {/* {!loadingCategories && categories.length > 0 && (
           <div className="flex justify-center mb-8 px-4 pt-3">
             <input
               type="text"
@@ -366,7 +366,7 @@ const Home = () => {
               className="w-full sm:w-96 px-4 py-2 text-neutral-300 bg-[#1f120584] rounded-md border border-amber-900 focus:outline-none focus:ring-1 focus:ring-[#c6a47441] placeholder:text-neutral-500"
             />
           </div>
-        )}
+        )} */}
 
         {/* Prompt Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 pb-10 pt-5">
@@ -398,7 +398,7 @@ const Home = () => {
                 <div className="flex justify-center items-center">
                   <img
                     width={"400px"}
-                    className="rounded-lg"
+                    className="rounded-lg zoom-out-img opacity-70"
                     src={`${BASE_URL}/uploads/${prompt.imageName}`}
                   />
                 </div>
@@ -436,7 +436,7 @@ const Home = () => {
                 return (
                   <div
                     key={`premium-${i}`}
-                    className="p-4 pb-6 rounded-xl flex flex-col justify-between gap-4 bg-orange-200/10 backdrop-blur-md border border-orange-300/20"
+                    className="p-4 pb-6 rounded-xl flex flex-col justify-between gap-4 bg-orange-200/10 backdrop-blur-md border border-orange-300/20 hover:shadow-lg hover:shadow-orange-500/50 transition-all duration-300 ease-in-out"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex flex-col">
@@ -474,7 +474,7 @@ const Home = () => {
                     <div className="flex justify-center items-center">
                       <img
                         width={"400px"}
-                        className="rounded-lg"
+                        className="rounded-lg zoom-out-img opacity-70"
                         src={`${BASE_URL}/uploads/${item.imageName}`}
                       />
                     </div>
