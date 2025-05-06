@@ -382,7 +382,7 @@ const Home = () => {
             filteredPrompts.map((prompt, i) => (
               <div
                 key={i}
-                className="p-4 pb-6 rounded-xl flex flex-col justify-between gap-4 bg-gray-400/10 backdrop-blur-md border border-white/20"
+                className="group p-4 pb-6 rounded-xl flex flex-col justify-between gap-4 bg-gray-400/10 backdrop-blur-md border border-white/20"
               >
                 <div className="flex items-start gap-2">
                   <h2 className="text-lg sm:text-xl text-stone-300 sub-font">
@@ -436,7 +436,7 @@ const Home = () => {
                 return (
                   <div
                     key={`premium-${i}`}
-                    className="p-4 pb-6 rounded-xl flex flex-col justify-between gap-4 bg-orange-200/10 backdrop-blur-md border border-orange-300/20 hover:shadow-lg hover:shadow-orange-500/50 transition-all duration-300 ease-in-out"
+                    className="group p-4 pb-6 rounded-xl flex flex-col justify-between gap-4 bg-orange-200/10 backdrop-blur-md border border-orange-300/20 hover:shadow-lg hover:shadow-orange-500/50 transition-all duration-300 ease-in-out"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex flex-col">
@@ -473,7 +473,7 @@ const Home = () => {
 
                     <div className="flex justify-center items-center">
                       <img
-                        width={"400px"}
+                        width="400px"
                         className="rounded-lg zoom-out-img opacity-70"
                         src={`${BASE_URL}/uploads/${item.imageName}`}
                       />
