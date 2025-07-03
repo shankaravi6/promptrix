@@ -13,7 +13,7 @@ const LandingPage = ({ onExplore }) => {
 
       {/* Navbar */}
       <div className="relative z-10 flex justify-between items-center px-8 py-9">
-        {/* <div className="text-white font-semibold text-xl">🟠 Dune</div>
+        {/* <div className="text-white font-semibold text-xl">Promptrix</div>
         <div className="hidden md:flex space-x-6 text-sm text-gray-300">
           <a href="#">Features</a>
           <a href="#">About Us</a>
