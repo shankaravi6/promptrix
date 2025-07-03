@@ -1,30 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const LandingPage = ({ onExplore }) => {
+  const [bgImage, setBgImage] = useState("images/landing5.png");
+
+  useEffect(() => {
+    const updateBackground = () => {
+      if (window.innerWidth <= 640) {
+        setBgImage("images/landing_small.png");
+      } else {
+        setBgImage("images/landing5.png");
+      }
+    };
+
+    updateBackground(); // Set on first render
+    window.addEventListener("resize", updateBackground); // Listen to screen resize
+
+    return () => window.removeEventListener("resize", updateBackground); // Cleanup
+  }, []);
+
   return (
     <div
       className="relative min-h-screen bg-black bg-cover bg-center text-white"
       style={{
-        backgroundImage: "url('images/landing5.png')",
+        backgroundImage: `url('${bgImage}')`,
       }}
     >
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50 z-0"></div>
+      <div className="absolute inset-0 bg-black/60 z-0"></div>
 
       {/* Navbar */}
       <div className="relative z-10 flex justify-between items-center px-8 py-9">
-        {/* <div className="text-white font-semibold text-xl">Promptrix</div>
-        <div className="hidden md:flex space-x-6 text-sm text-gray-300">
-          <a href="#">Features</a>
-          <a href="#">About Us</a>
-          <a href="#">Benefits</a>
-        </div>
-        <div className="flex space-x-4 text-sm">
-          <button className="text-white">Sign Up</button>
-          <button className="bg-white text-black px-4 py-1 rounded-full">
-            Log In
-          </button>
-        </div> */}
+        {/* Optional Navbar */}
       </div>
 
       {/* Hero Text */}
