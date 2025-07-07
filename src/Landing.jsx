@@ -12,10 +12,10 @@ const LandingPage = ({ onExplore }) => {
       }
     };
 
-    updateBackground(); // Set on first render
-    window.addEventListener("resize", updateBackground); // Listen to screen resize
+    updateBackground();
+    window.addEventListener("resize", updateBackground);
 
-    return () => window.removeEventListener("resize", updateBackground); // Cleanup
+    return () => window.removeEventListener("resize", updateBackground);
   }, []);
 
   return (
@@ -26,7 +26,7 @@ const LandingPage = ({ onExplore }) => {
       }}
     >
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/60 z-0"></div>
+      <div className="absolute inset-0 bg-black/50 z-0"></div>
 
       {/* Navbar */}
       <div className="relative z-10 flex justify-between items-center px-8 py-9">
@@ -49,7 +49,7 @@ const LandingPage = ({ onExplore }) => {
           <div className="mt-8 flex gap-4">
             <button
               onClick={onExplore}
-              className="bg-neutral-400 text-neutral-900 px-6 py-2 rounded-full font-medium sub-font cursor-pointer"
+              className="bg-neutral-400 text-neutral-900 px-6 py-2 rounded-md font-medium sub-font cursor-pointer"
             >
               Explore Prompts
             </button>
